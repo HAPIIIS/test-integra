@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Table</title>
+
+    <style>
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          border: 1px solid black;
+          padding: 8px;
+          text-align: center;
+        }
+        th {
+          background-color: #f2f2f2;
+        }
+        .gray-background {
+          background-color: #f2f2f2;
+        }
+        td.red {
+          color: red;
+        }
+      </style>
+</head>
+<body>
+    <div class="container"></div>
+
+    <script>
+        const data = [            
+            ["123", "Hula", "Math", "UTS", 8],
+            ["123", "Hula", "Math", "UAS", 7],
+            ["123", "Hula", "History", "UTS", 6],
+            ["123", "Hula", "History", "UAS", 5],
+            ["123", "Hula", "History", "Project", 4],
+            ["456", "Bobo", "Math", "UTS", 10],
+            ["456", "Bobo", "Math", "UAS", null],
+            ["456", "Bobo", "History", "UTS", 6],
+            ["456", "Bobo", "History", "UAS", 5],
+            ["456", "Bobo", "History", "Project", null],
+            ["789", "Luna", "Math", "UTS", 10],
+            ["789", "Luna", "Math", "UAS", null],
+            ["789", "Luna", "History", "UTS", 6],
+            ["789", "Luna", "History", "UAS", 5],
+            ["789", "Luna", "History", "Project", null]
+        ];
+    
+        function processData(data) {
+            const mergedData = {};
+            
+            data.forEach(([nrp, student, subject, test, score]) => {
+                if (!mergedData[nrp]) {
+                    mergedData[nrp] = { nrp, student, subjects: {} };
+                }
+                
+                if (!mergedData[nrp].subjects[subject]) {
+                    mergedData[nrp].subjects[subject] = { tests: [] };
+                }
+                
+                mergedData[nrp].subjects[subject].tests.push({ test, score });
+            });
+            
+            Object.values(mergedData).forEach(student => {
+                Object.values(student.subjects).forEach(subject => {
+                    const scores = subject.tests.map(t => t.score).filter(score => score !== null);
+                    subject.finalScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '-';
+                });
+            });
+            
+            return Object.values(mergedData);
+        }
+
+        function medians(student) {
+            const allScores = Object.values(student.subjects).flatMap(subject => 
+                subject.tests.map(t => t.score).filter(score => score !== null)
+            );
+            if (allScores.length === 0) return '-';
+            allScores.sort((a, b) => a - b);
+            const mid = Math.floor(allScores.length / 2);
+            return allScores.length % 2 !== 0 ? allScores[mid] : ((allScores[mid - 1] + allScores[mid]) / 2).toFixed(1);
+        }
+
+        function createTable(mergedData) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+
+            thead.innerHTML = `
+                <tr>
+                    <th>nrp</th>
+                    <th>student</th>
+                    <th>subject</th>
+                    <th>test</th>
+                    <th>test score</th>
+                    <th>final score</th>
+                    <th>median*</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            mergedData.forEach(student => {
+                const median = medians(student);
+                let isFirstRow = true;
+                Object.entries(student.subjects).forEach(([subject, data], subjectIndex) => {
+                    data.tests.forEach(({ test, score }, testIndex) => {
+                        const row = document.createElement('tr');
+                        if (isFirstRow) {
+                            row.innerHTML += `
+                                <td rowspan="${Object.values(student.subjects).reduce((acc, subj) => acc + subj.tests.length, 0)}">${student.nrp}</td>
+                                <td rowspan="${Object.values(student.subjects).reduce((acc, subj) => acc + subj.tests.length, 0)}">${student.student}</td>
+                            `;
+                            isFirstRow = false;
+                        }
+                        if (testIndex === 0) {
+                            row.innerHTML += `<td rowspan="${data.tests.length}">${subject}</td>`;
+                        }
+                        row.innerHTML += `
+                            <td>${test}</td>
+                            <td>${score !== null ? score : '-'}</td>
+                        `;
+                        if (testIndex === 0) {
+                            row.innerHTML += `<td rowspan="${data.tests.length}">${data.finalScore}</td>`;
+                        }
+                        if (subjectIndex === 0 && testIndex === 0) {
+                            row.innerHTML += `<td rowspan="${Object.values(student.subjects).reduce((acc, subj) => acc + subj.tests.length, 0)}">${median}</td>`;
+                        }
+                        tbody.appendChild(row);
+                    });
+                });
+            });
+            table.appendChild(tbody);
+            
+            return table;
+        }
+
+        const mergedData = processData(data);
+        const table = createTable(mergedData);
+
+        document.body.appendChild(table);
+    </script>    
+</body>
+</html>
