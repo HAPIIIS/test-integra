@@ -1,11 +1,11 @@
-erDiagram
-    SUPPLIER ||--o{ PURCHASE_ORDER : "membuat"
-    PURCHASE_ORDER ||--o{ PO_DETAIL : "memiliki"
-    PRODUCT ||--o{ PO_DETAIL : "termasuk"
-    SUPPLIER ||--o{ SURAT_JALAN : "mengirim"
-    SURAT_JALAN ||--o{ SJ_DETAIL : "memiliki"
-    PRODUCT ||--o{ SJ_DETAIL : "termasuk"
-    PO_DETAIL ||--o{ SJ_DETAIL : "terkait"
+    erDiagram
+        SUPPLIER ||--o{ PURCHASE_ORDER : "membuat"
+        PURCHASE_ORDER ||--o{ PO_DETAIL : "memiliki"
+        PRODUCT ||--o{ PO_DETAIL : "termasuk"
+        SUPPLIER ||--o{ SURAT_JALAN : "mengirim"
+        SURAT_JALAN ||--o{ SJ_DETAIL : "memiliki"
+        PRODUCT ||--o{ SJ_DETAIL : "termasuk"
+        PO_DETAIL ||--o{ SJ_DETAIL : "terkait"
 
     SUPPLIER {
         int supplier_id PK
